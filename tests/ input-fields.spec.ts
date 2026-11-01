@@ -1,26 +1,23 @@
-import { test } from '@playwright/test';
-import { PetTypesPage } from '../pages/PetTypesPage'; 
 
-test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-    await page.locator('.overlay').waitFor({ state: 'detached', timeout: 15000 });
-    await page.getByRole('link', { name: ' Pet Types' }).click({ force: true });
-});
+import { test, expect } from '@playwright/test';
 
-test('should successfully update and reset pet type', async ({ page }) => {
-    const petTypesPage = new PetTypesPage(page);
-    await petTypesPage.verifyOnMainPage();
-    
-    await test.step('Update the pet type from cat to rabbit', async () => {
-        await petTypesPage.clickEditOnFirstRow();
-        await petTypesPage.updatePetTypeName('rabbit');
-        await petTypesPage.verifyFirstRowValue('rabbit');
-    });
+test('should update and reset pet type', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Pet Types' }).click();
 
-   
-    await test.step('Reset the pet type back from rabbit to cat', async () => {
-        await petTypesPage.clickEditOnFirstRow();
-        await petTypesPage.updatePetTypeName('cat');
-        await petTypesPage.verifyFirstRowValue('cat');
-    });
+  await expect(page.getByRole('heading')).toHaveText('Pet Types');
+  await page.getByRole('row', { name: 'cat' }).getByRole('button', { name: 'Edit' }).click();
+
+  await expect(page.getByRole('heading')).toHaveText('Edit Pet Type');
+  const nameInput = page.getByRole('textbox');
+  await expect(nameInput).toHaveValue('cat');
+  await nameInput.fill('rabbit');
+  await page.getByRole('button', { name: 'Update' }).click();
+
+  await expect(page.getByRole('heading')).toHaveText('Pet Types');
+  await page.getByRole('row', { name: 'rabbit' }).getByRole('button', { name: 'Edit' }).click();
+  await expect(page.getByRole('textbox')).toHaveValue('rabbit');
+  await page.getByRole('textbox').fill('cat');
+  await page.getByRole('button', { name: 'Update' }).click();
+  await expect(page.getByRole('row', { name: 'cat' })).toBeVisible();
 });
