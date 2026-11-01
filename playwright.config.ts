@@ -1,5 +1,4 @@
 import { defineConfig } from '@playwright/test';
-import * as path from 'path';
 import 'dotenv/config'; 
 
 export default defineConfig({
